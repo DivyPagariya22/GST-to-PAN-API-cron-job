@@ -6,18 +6,17 @@ import { fos_db, db } from "../app.config.js";
 
 export async function findGSTFromPan() {
   try {
-    const date = "2023-03-27 17:53:49.583"; // new Date();
+    const date = new Date(); // For Testing => "2023-03-27 17:53:49.583";
     const startDate = moment(date)
       .startOf("day")
       .format("YYYY-MM-DD[T]HH:mm:ss[Z]");
     console.log(date, startDate);
 
     const storeVerifiedToday = await db.any(
-      `select id, pan from store where pan_verification_status = 'VERIFIED' and pan_verified_at >= $1
-     and pan_verified_at <= $2
-    `,
+      `select id, pan from store where pan_verification_status = 'VERIFIED' and pan_verified_at >= $1`,
       [startDate, date]
     );
+
     console.log("From Store Table", storeVerifiedToday);
 
     const storeNotPresentInPanInfoTable = await getFilteredStores(
@@ -29,9 +28,7 @@ export async function findGSTFromPan() {
       storeNotPresentInPanInfoTable
     );
 
-    // storeNotPresentInPanInfoTable.push({ id: 225, pan: "ACWPC8448A" });
-    // storeNotPresentInPanInfoTable.push({ id: 225, pan: "ACWPC8448A" });
-    // storeNotPresentInPanInfoTable.push({ id: 225, pan: "ACWPC8448A" });
+    //For Testing => storeNotPresentInPanInfoTable.push({ id: 10576, pan: "GNPPP0679J" });
 
     for (let i = 0; i < storeNotPresentInPanInfoTable.length; i++) {
       // SleepTime for every 5th iteration
@@ -46,7 +43,7 @@ export async function findGSTFromPan() {
 
       // Check Pan Number
       const panRegex = /[A-Z]{5}[0-9]{4}[A-Z]{1}/;
-      if (pan.length != 0 && panRegex.test(pan)) {
+      if (pan && pan.length != 0 && panRegex.test(pan)) {
         // Making API Call to MasterGst
         const response = await fetch(
           `https://blog-backend.mastersindia.co/api/v1/custom/search/name_and_pan/?keyword=${pan}`,
@@ -67,12 +64,11 @@ export async function findGSTFromPan() {
           };
         } else {
           console.log("NOT found GST!");
-          notFoundGST++;
           resData = {
             store_id: id,
             gstin: null,
             gst_json: {},
-            pan: store.pan,
+            pan: pan,
           };
         }
 

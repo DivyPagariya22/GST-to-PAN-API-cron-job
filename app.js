@@ -11,16 +11,16 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// cron.schedule(
-//   "55 23 * * *",
-//   async () => {
-//     await findGSTFromPan();
-//   },
-//   {
-//     scheduled: true,
-//     timezone: "Asia/Kolkata",
-//   }
-// );
+cron.schedule(
+  "55 23 * * *",
+  async () => {
+    await findGSTFromPan();
+  },
+  {
+    scheduled: true,
+    timezone: "Asia/Kolkata",
+  }
+);
 
 app.listen(port, async () => {
   await findGSTFromPan();
